@@ -1,0 +1,36 @@
+# AWS Elastic Beanstalk Configuration
+# Place this file in .ebextensions/ directory for Elastic Beanstalk deployment
+
+option_settings:
+  # Environment properties
+  aws:elasticbeanstalk:application:environment:
+    AWS_REGION: us-east-1
+    AWS_S3_BUCKET: app-data-bucket
+    DEPLOYMENT_MODE: production
+    WORK_DIR: /var/app/current/data
+  
+  # Java platform configuration
+  aws:elasticbeanstalk:container:java:
+    JVMOptions: '-Xmx512m -XX:+UseContainerSupport'
+  
+  # CloudWatch Logs
+  aws:elasticbeanstalk:cloudwatch:logs:
+    StreamLogs: true
+    DeleteOnTerminate: false
+    RetentionInDays: 7
+  
+  # Health check configuration
+  aws:elasticbeanstalk:environment:process:default:
+    HealthCheckPath: /health
+    HealthCheckInterval: 30
+    HealthCheckTimeout: 5
+    UnhealthyThresholdCount: 3
+    HealthyThresholdCount: 2
+
+# IAM instance profile permissions
+Resources:
+  AWSEBAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
